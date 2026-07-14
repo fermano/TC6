@@ -7,4 +7,6 @@ Owner filters preserve input record order and use the same canonicalization rule
 as routing. A missing owner selection means no filtering; an explicitly empty
 selection returns no records.
 
-Delivery summaries expose owner and status. Source metadata may be added as an opt-in field; behavior for blank or missing source values is not yet recorded here.
+Delivery summaries expose owner and status by default. Callers may opt into a
+trimmed, lowercased source field; blank or missing opted-in sources are reported
+as `unknown`.

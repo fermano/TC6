@@ -1,4 +1,5 @@
 DEFAULT_OWNER = "engineering-ops"
+UNKNOWN_SOURCE = "unknown"
 
 
 def normalize_delivery_owner(owner: str | None) -> str:
@@ -23,9 +24,13 @@ def filter_delivery_records(
     ]
 
 
-def delivery_summary(record: dict) -> dict:
-    """Return the stable summary fields currently exposed to callers."""
-    return {
+def delivery_summary(record: dict, include_source: bool = False) -> dict:
+    """Return stable summary fields, optionally including normalized source."""
+    summary = {
         "owner": normalize_delivery_owner(record.get("owner")),
         "status": record["status"],
     }
+    if include_source:
+        normalized_source = (record.get("source") or "").strip().lower()
+        summary["source"] = normalized_source or UNKNOWN_SOURCE
+    return summary

@@ -1,6 +1,11 @@
 import unittest
 
-from src.ticket_workflow_seed import DEFAULT_OWNER, delivery_summary, normalize_delivery_owner
+from src.ticket_workflow_seed import (
+    DEFAULT_OWNER,
+    delivery_summary,
+    filter_delivery_records,
+    normalize_delivery_owner,
+)
 
 
 class TicketWorkflowSeedTests(unittest.TestCase):
@@ -18,6 +23,31 @@ class TicketWorkflowSeedTests(unittest.TestCase):
 
     def test_whitespace_only_owner_uses_default(self):
         self.assertEqual(normalize_delivery_owner(" \t\n "), DEFAULT_OWNER)
+
+    def test_missing_owner_selection_preserves_all_records(self):
+        records = [{"owner": "beta"}, {"owner": "alpha"}]
+        self.assertEqual(filter_delivery_records(records), records)
+
+    def test_empty_owner_selection_returns_no_records(self):
+        self.assertEqual(filter_delivery_records([{"owner": "alpha"}], []), [])
+
+    def test_owner_filter_uses_canonical_values_and_preserves_order(self):
+        records = [
+            {"id": 1, "owner": " Billing  Ops "},
+            {"id": 2, "owner": "platform"},
+            {"id": 3, "owner": "billing ops"},
+        ]
+        self.assertEqual(
+            filter_delivery_records(records, ["BILLING\tOPS"]),
+            [records[0], records[2]],
+        )
+
+    def test_owner_filter_matches_blank_owner_to_default(self):
+        records = [{"owner": None}, {"owner": "platform"}]
+        self.assertEqual(
+            filter_delivery_records(records, [DEFAULT_OWNER]),
+            [records[0]],
+        )
 
     def test_summary_contains_existing_fields(self):
         self.assertEqual(
